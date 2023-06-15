@@ -14,10 +14,10 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import java.io.IOException
-import javax.servlet.FilterChain
-import javax.servlet.ServletException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.FilterChain
+import jakarta.servlet.ServletException
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 @Slf4j
 class CredentialsAuthenticationFilter(
@@ -28,7 +28,7 @@ class CredentialsAuthenticationFilter(
 ) : AbstractAuthenticationProcessingFilter(defaultProcessUrl) {
     @Throws(IOException::class)
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
-        if (HttpMethod.POST.name != request.method) {
+        if (HttpMethod.POST.name() != request.method) {
             logger.debug("Authentication method not supported. Request method: " + request.method)
             throw AuthMethodNotSupportedException("Authentication method not supported")
         }

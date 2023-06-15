@@ -4,8 +4,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import java.util.stream.Collectors
-import javax.servlet.http.HttpServletRequest
-import javax.validation.constraints.NotNull
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.validation.constraints.NotNull
 
 class PermittedRequestMatcher(pathsToSkip: @NotNull List<String>, processingPath: String?) : RequestMatcher {
     private val matchers: OrRequestMatcher

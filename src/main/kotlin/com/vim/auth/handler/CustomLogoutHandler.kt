@@ -3,11 +3,11 @@ package com.vim.auth.handler
 import com.vim.auth.config.AUTHENTICATION_HEADER_NAME
 import com.vim.auth.functional.UserLoginStatusUpdateFunction
 import com.vim.auth.jwt.JwtFactory
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.logout.LogoutHandler
 import org.springframework.stereotype.Component
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class CustomLogoutHandler(

@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - master
+      - 3.1.0
 
 jobs:
   build:

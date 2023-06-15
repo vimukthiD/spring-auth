@@ -5,6 +5,8 @@ import com.vim.auth.functional.UserLoginStatusUpdateFunction
 import com.vim.auth.jwt.JwtFactory
 import com.vim.auth.model.JsonWebToken
 import com.vim.auth.model.UserContext
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -13,8 +15,6 @@ import org.springframework.security.web.WebAttributes
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.stereotype.Component
 import java.io.IOException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class CredentialsAuthenticationSuccessHandler @Autowired constructor(

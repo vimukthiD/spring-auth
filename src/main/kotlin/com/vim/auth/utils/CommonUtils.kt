@@ -4,6 +4,8 @@ package com.vim.auth.utils
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.*
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.abs
@@ -32,3 +34,24 @@ fun isAnyNull(vararg values: Any): Boolean {
 }
 
 fun getLogger(forClass: Class<*>): Logger = LoggerFactory.getLogger(forClass)
+
+@Suppress("UNCHECKED_CAST")
+fun <T : Serializable> fromByteArray(byteArray: ByteArray): T {
+    return ByteArrayInputStream(byteArray).use {
+        ObjectInputStream(it).use { ois ->
+            ois.readObject() as T
+        }
+    }
+}
+
+fun Serializable.toByteArray(): ByteArray {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    val objectOutputStream: ObjectOutputStream
+    objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
+    objectOutputStream.writeObject(this)
+    objectOutputStream.flush()
+    val result = byteArrayOutputStream.toByteArray()
+    byteArrayOutputStream.close()
+    objectOutputStream.close()
+    return result
+}
