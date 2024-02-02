@@ -34,8 +34,9 @@ class JwtFactory @Autowired constructor(private val settings: JwtFactoryConfigur
         userContext.authorities
         require(!userContext.authorities.isEmpty()) { "User doesn't have any privileges" }
         val claims = Jwts.claims()
-            .setId(userContext.tokenId)
-            .setSubject(userContext.username)
+            .id(userContext.tokenId)
+            .subject(userContext.username)
+            .build()
         val roles = userContext.authorities.stream().map { obj: Any -> obj.toString() }.collect(Collectors.toList())
         val currentTime = LocalDateTime.now()
         val expiryTime = currentTime.plusMinutes(settings.ttlMinutes)
@@ -43,21 +44,21 @@ class JwtFactory @Autowired constructor(private val settings: JwtFactoryConfigur
         val dateCreated = Date.from(currentTime.atZone(ZoneId.systemDefault()).toInstant())
         val dateExpire = Date.from(expiryTime.atZone(ZoneId.systemDefault()).toInstant())
         val token = AUTHENTICATION_TOKEN_PREFIX + Jwts.builder()
-            .setClaims(claims)
-            .setIssuer(settings.tokenIssuer)
-            .setIssuedAt(dateCreated)
-            .setExpiration(dateExpire)
-            .signWith(Keys.hmacShaKeyFor(settings.secret.toByteArray()), SignatureAlgorithm.HS512)
+            .claims(claims)
+            .issuer(settings.tokenIssuer)
+            .issuedAt(dateCreated)
+            .expiration(dateExpire)
+            .signWith(Keys.hmacShaKeyFor(settings.secret.toByteArray()), Jwts.SIG.HS512)
             .compact()
         return PortableAccessToken(token, roles, expiryTime)
     }
 
     fun getTemporaryAccessTokenSubject(token: String?): String {
         return try {
-            Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(settings.secret.toByteArray()))
+            Jwts.parser()
+                .decryptWith(Keys.hmacShaKeyFor(settings.secret.toByteArray()))
                 .build()
-                .parseClaimsJws(token).body.subject
+                .parseSignedClaims(token).payload.subject
         } catch (ex: UnsupportedJwtException) {
             logger.error(INVALID_JWT, ex)
             throw BadCredentialsException(INVALID_JWT, ex)
@@ -79,9 +80,9 @@ class JwtFactory @Autowired constructor(private val settings: JwtFactoryConfigur
     fun parseClaimsForToken(token: String?): Jws<Claims> {
         return try {
             val tokenString = extractTokenString(token)
-            Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(settings.secret.toByteArray()))
-                .build().parseClaimsJws(tokenString)
+            Jwts.parser()
+                .decryptWith(Keys.hmacShaKeyFor(settings.secret.toByteArray()))
+                .build().parseSignedClaims(tokenString)
         } catch (ex: UnsupportedJwtException) {
             logger.error(INVALID_JWT, ex)
             throw BadCredentialsException(INVALID_JWT, ex)
@@ -106,10 +107,10 @@ class JwtFactory @Autowired constructor(private val settings: JwtFactoryConfigur
 
     fun validateAccessToken(accessToken: String?): Boolean {
         return try {
-            Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(settings.secret.toByteArray()))
+            Jwts.parser()
+                .decryptWith(Keys.hmacShaKeyFor(settings.secret.toByteArray()))
                 .build()
-                .parseClaimsJws(extractTokenString(accessToken))
+                .parseSignedClaims(extractTokenString(accessToken))
             true
         } catch (e: Exception) {
             logger.error("Error occurred while attempting to decrypt the accessToken.", e)
@@ -131,17 +132,17 @@ class JwtFactory @Autowired constructor(private val settings: JwtFactoryConfigur
 
     fun createTemporaryAuthToken(email: String?): String {
         require(isValidString(email)) { "Cannot create JWT without username" }
-        val claims = Jwts.claims().setSubject(email)
+        val claims = Jwts.claims().subject(email).build()
         val currentTime = LocalDateTime.now()
         val dateCreated = Date.from(currentTime.atZone(ZoneId.systemDefault()).toInstant())
         val dateExpire =
             Date.from(currentTime.plusMinutes(settings.ttlMinutes).atZone(ZoneId.systemDefault()).toInstant())
         return Jwts.builder()
-            .setClaims(claims)
-            .setIssuer(settings.tokenIssuer)
-            .setIssuedAt(dateCreated)
-            .setExpiration(dateExpire)
-            .signWith(Keys.hmacShaKeyFor(settings.secret.toByteArray()), SignatureAlgorithm.HS512)
+            .claims(claims)
+            .issuer(settings.tokenIssuer)
+            .issuedAt(dateCreated)
+            .expiration(dateExpire)
+            .signWith(Keys.hmacShaKeyFor(settings.secret.toByteArray()), Jwts.SIG.HS512)
             .compact()
     }
 }
